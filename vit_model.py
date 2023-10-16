@@ -49,9 +49,9 @@ class PatchEmbeddings(nn.Module):
 
         # Calculate Patch Embeddings, then flatten into
         # batched 1D sequence (batch_size, seq_length, hidden_size)
-        x = x.reshape(batch_size, num_channels, height // self.patch_size, self.patch_size, width // self.patch_size, self.patch_size)
+        x = x.view(batch_size, num_channels, height // self.patch_size, self.patch_size, width // self.patch_size, self.patch_size)
         x = x.permute(0, 2, 4, 1, 3, 5)
-        x = x.flatten(1,2)
+        x = x.reshape(batch_size, -1, num_channels * self.patch_size * self.patch_size)
         embeddings = self.projection(x)
         # #########################
         return embeddings
@@ -86,8 +86,8 @@ class PositionEmbedding(nn.Module):
         # #########################
 
         # Concatenate [CLS] token with embedded patch tokens
-        embeddings = torch.cat([self.cls_token, embeddings], dim=1)
-
+        cls_token = self.cls_token.expand(embeddings.shape[0], -1, -1)
+        embeddings = torch.cat([cls_token, embeddings], dim=1)
         # Then add positional encoding to each token
         embeddings += self.position_embeddings
 
@@ -169,7 +169,7 @@ class ViT(nn.Module):
         num_patches = self.patch_embed.getNumPatches()
         self.pos_embed = PositionEmbedding(num_patches, hidden_size)
 
-        self.ln_pre = nn.Linear(num_channels * (patch_size ** 2), hidden_size)
+        self.ln_pre = nn.LayerNorm(hidden_size)
 
         self.transformer = Transformer(hidden_size, layers, heads)  # TODO: Use the provided transformer codeblock
 
@@ -187,8 +187,8 @@ class ViT(nn.Module):
         x = self.ln_pre(x)
         x = self.transformer(x)
         out = self.ln_post(x)
+        out = out[:, 0, :]
         # #########################
-
         return out
 
 class ClassificationHead(nn.Module):
