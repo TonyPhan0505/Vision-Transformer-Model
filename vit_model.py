@@ -34,8 +34,8 @@ class PatchEmbeddings(nn.Module):
         return self.num_patches
 
     def forward(
-        self, 
-        x: torch.Tensor,
+            self, 
+            x: torch.Tensor,
         ) -> torch.Tensor:
         batch_size, num_channels, height, width = x.shape
         if num_channels != self.num_channels:
@@ -58,9 +58,9 @@ class PatchEmbeddings(nn.Module):
 
 class PositionEmbedding(nn.Module):
     def __init__(
-        self,
-        num_patches,
-        hidden_size,
+            self,
+            num_patches,
+            hidden_size,
         ):
         """TODO: (0.5 out of 8) Given patch embeddings, 
         calculate position embeddings with [CLS] and [POS].
@@ -73,13 +73,13 @@ class PositionEmbedding(nn.Module):
         # Specify [CLS] and positional embedding as learnable parameters
 
         self.cls_token = nn.Parameter(torch.randn(1, 1, hidden_size))
-        self.position_embeddings = nn.Parameter(torch.randn(1, 1 + num_patches, hidden_size))
+        self.position_embeddings = nn.Parameter(torch.randn(1, num_patches + 1, hidden_size))
 
         # #########################
 
     def forward(
-        self,
-        embeddings: torch.Tensor
+            self,
+            embeddings: torch.Tensor
         ) -> torch.Tensor:
         # #########################
         # Finish Your Code HERE
@@ -89,8 +89,9 @@ class PositionEmbedding(nn.Module):
         cls_token = self.cls_token.expand(embeddings.shape[0], -1, -1)
         embeddings = torch.cat([cls_token, embeddings], dim=1)
         # Then add positional encoding to each token
+        if embeddings.size(1) > self.position_embeddings.size(1):
+            embeddings = embeddings[:, :self.position_embeddings.size(1), :]
         embeddings += self.position_embeddings
-
         # #########################
         return embeddings
 
@@ -152,13 +153,13 @@ class ViT(nn.Module):
     """TODO: (0.5 out of 8) Vision Transformer.
     """
     def __init__(
-        self, 
-        image_size: int, 
-        patch_size: int, 
-        num_channels: int,
-        hidden_size: int, 
-        layers: int, 
-        heads: int,
+            self, 
+            image_size: int, 
+            patch_size: int, 
+            num_channels: int,
+            hidden_size: int, 
+            layers: int, 
+            heads: int,
         ):
         super().__init__()
         self.hidden_size = hidden_size
@@ -193,16 +194,16 @@ class ViT(nn.Module):
 
 class ClassificationHead(nn.Module):
     def __init__(
-        self, 
-        hidden_size: int,
-        num_classes: int = 10,
+            self, 
+            hidden_size: int,
+            num_classes: int = 10,
         ):
         super().__init__()
         self.classifier = nn.Linear(hidden_size, num_classes)
 
     def forward(
-        self, 
-        feats: torch.Tensor,
+            self, 
+            feats: torch.Tensor,
         ) -> torch.Tensor:
         out = self.classifier(feats)
         return out
@@ -211,9 +212,9 @@ class LinearEmbeddingHead(nn.Module):
     """TODO: (0.25 out of 8) Given features from ViT, generate linear embedding vectors.
     """
     def __init__(
-        self, 
-        hidden_size: int,
-        embed_size: int = 64,
+            self, 
+            hidden_size: int,
+            embed_size: int = 64,
         ):
         super().__init__()
         self.embed_size = embed_size
