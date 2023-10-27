@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class PatchEmbeddings(nn.Module):
-    """TODO: (0.5 out of 8) Calculates patch embedding
+    """Calculates patch embedding
     of shape `(batch_size, seq_length, hidden_size)`.
     """
     # num_channels = 3 for RGB, 1 for Grayscale
@@ -48,7 +48,7 @@ class PatchEmbeddings(nn.Module):
 
 class PositionEmbedding(nn.Module):
     def __init__(self, num_patches, hidden_size):
-        """TODO: (0.5 out of 8) Given patch embeddings, 
+        """Given patch embeddings, 
         calculate position embeddings with [CLS] and [POS].
         """
         super().__init__()
@@ -139,7 +139,7 @@ class Transformer(nn.Module):
         return x
 
 class ViT(nn.Module):
-    """TODO: (0.5 out of 8) Vision Transformer.
+    """Vision Transformer.
     """
     def __init__(self, image_size: int, patch_size: int, num_channels: int, hidden_size: int, layers: int, heads: int):
         super().__init__()
@@ -186,7 +186,7 @@ class ClassificationHead(nn.Module):
         return out
 
 class LinearEmbeddingHead(nn.Module):
-    """TODO: (0.25 out of 8) Given features from ViT, generate linear embedding vectors.
+    """Given features from ViT, generate linear embedding vectors.
     """
     def __init__(self, hidden_size: int, embed_size: int = 64):
         super().__init__()
